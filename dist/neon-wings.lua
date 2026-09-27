@@ -147,6 +147,8 @@ local function createWing(side)
         Config.AttachY,
         Config.AttachZ
     ) * CFrame.Angles(Rx, Ry, Rz)
+      * CFrame.Angles(0, math.rad(Config.WingSideRotate * side), 0)
+    -- ⭐ доп. поворот в стороны
 
     local spineMotor = makeMotor(torso, spine, baseC0)
     spineMotor.Name = "WingRoot"
