@@ -1,5 +1,5 @@
 -- ============================================
--- == NEON WINGS v1.0.7 (ФИНАЛ) ==
+-- == NEON WINGS v1.0.8 (WingSideRotate) ==
 -- == Автор: a32435629-collab ==
 -- ============================================
 
@@ -26,6 +26,7 @@ local Config = {
     AttachZ = 0.5,
     WingTiltBack = -50,
     WingTiltUp = 10,
+    WingSideRotate = 50,   -- ⭐ НОВОЕ: поворот крыльев в стороны
 
     LightBrightness = 0.3,
     LightRange = 2,
@@ -123,7 +124,7 @@ folder.Name = "NeonWings"
 folder.Parent = torso
 
 -- ══════════════════════════════════════════
--- == СОЗДАНИЕ КРЫЛА (Mode 2) ==
+-- == СОЗДАНИЕ КРЫЛА ==
 -- ══════════════════════════════════════════
 local function createWing(side)
     local model = Instance.new("Model")
@@ -137,7 +138,7 @@ local function createWing(side)
         "Spine", model
     )
 
-    -- ⭐ MODE 2: Rx, Ry, Rz — все без side
+    -- MODE 2 + WingSideRotate
     local Rx = math.rad(Config.WingTiltBack)
     local Ry = math.rad(90)
     local Rz = math.rad(-Config.WingTiltUp)
@@ -148,7 +149,7 @@ local function createWing(side)
         Config.AttachZ
     ) * CFrame.Angles(Rx, Ry, Rz)
       * CFrame.Angles(0, math.rad(Config.WingSideRotate * side), 0)
-    -- ⭐ доп. поворот в стороны
+    -- ⭐ доп. поворот в стороны (симметрично)
 
     local spineMotor = makeMotor(torso, spine, baseC0)
     spineMotor.Name = "WingRoot"
@@ -171,7 +172,6 @@ local function createWing(side)
             "Feather", model
         )
 
-        -- ⭐ MODE 2: перья тоже без side
         local c0 = CFrame.new(alongSpine, 0, 0)
             * CFrame.Angles(0, 0, math.rad(-dropAngle))
             * CFrame.new(0, -length / 2, 0)
@@ -439,7 +439,6 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 print("========================================")
-print("  Neon Wings v1.0.7 (Mode 2)")
+print("  Neon Wings v1.0.8 (WingSideRotate = " .. Config.WingSideRotate .. ")")
 print("  G — крылья  |  H — нимб")
-print("  github.com/a32435629-collab/neon-wings")
 print("========================================")
