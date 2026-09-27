@@ -1,5 +1,6 @@
 -- ============================================
 -- == WING — создание и анимация крыла ==
+-- == v1.0.7 (Mode 2 — симметрия) ==
 -- ============================================
 
 local Utils = require(script.Parent.utils)
@@ -30,28 +31,16 @@ function Wing.create(torso, side, config)
     )
     self.spine = spine
 
-    -- ══ КРЕПЛЕНИЕ ══
-    local wingAngleBack = math.rad(config.WingTiltBack)
-    local wingAngle90 = math.rad(side * 90)
-    local wingAngleUp = math.rad(-config.WingTiltUp * side)
-
+    -- ══ КРЕПЛЕНИЕ (Mode 2: все углы БЕЗ side) ══
     local baseC0 = CFrame.new(
         side * config.AttachX,
         config.AttachY,
         config.AttachZ
     ) * CFrame.Angles(
-        wingAngleBack,
-        wingAngle90,
-        wingAngleUp
+        math.rad(config.WingTiltBack),   -- Rx
+        math.rad(90),                    -- Ry (без side)
+        math.rad(-config.WingTiltUp)     -- Rz (без side)
     )
-
-    -- Доп. поворот только для левого крыла (симметрия)
-    if side == -1 then
-        baseC0 = baseC0 * Utils.buildExtraRotation(
-            config.LeftWingExtraAxis,
-            config.LeftWingExtraAngle
-        )
-    end
 
     self.baseRootC0 = baseC0
 
@@ -84,9 +73,9 @@ function Wing.create(torso, side, config)
             self.model
         )
 
-        -- ⭐ Симметричный C0
+        -- ⭐ Mode 2: перья БЕЗ side
         local c0 = CFrame.new(alongSpine, 0, 0)
-            * CFrame.Angles(0, 0, math.rad(-dropAngle * side))
+            * CFrame.Angles(0, 0, math.rad(-dropAngle))
             * CFrame.new(0, -length / 2, 0)
 
         local m = Utils.makeMotor(spine, feather, c0)
@@ -162,7 +151,7 @@ function Wing:update(physics, config, dt, getColor)
         config.SpringStiffness, config.SpringDamping, 45
     )
 
-    -- Применяем к корню
+    -- ⭐ Мах — С side (чтобы крылья махали симметрично)
     self.spineMotor.C0 = CFrame.Angles(0, 0, math.rad(self.flap * side))
         * self.baseRootC0
 
@@ -179,7 +168,8 @@ function Wing:update(physics, config, dt, getColor)
             20
         )
 
-        f.motor.C0 = CFrame.Angles(0, 0, math.rad(f.bend * side)) * f.baseC0
+        -- ⭐ Mode 2: bend БЕЗ side
+        f.motor.C0 = CFrame.Angles(0, 0, math.rad(f.bend)) * f.baseC0
         f.part.Color = getColor(f.t * 0.9)
     end
 
