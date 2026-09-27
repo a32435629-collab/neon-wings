@@ -1,16 +1,12 @@
 -- ============================================
--- == NEON WINGS v1.0 (SINGLE FILE BUILD) ==
+-- == NEON WINGS v1.0.7 (ФИНАЛ) ==
 -- == Автор: a32435629-collab ==
--- == Для executor: скопируй всё и запусти ==
 -- ============================================
 
 local plr = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- ══════════════════════════════════════════
--- == CONFIG ==
--- ══════════════════════════════════════════
 local Config = {
     ColorMode = "Gradient",
     ColorA = Color3.fromRGB(0, 200, 255),
@@ -30,9 +26,6 @@ local Config = {
     AttachZ = 0.5,
     WingTiltBack = -50,
     WingTiltUp = 10,
-
-    LeftWingExtraAxis = "Z",
-    LeftWingExtraAngle = 122.5,
 
     LightBrightness = 0.3,
     LightRange = 2,
@@ -56,7 +49,6 @@ local Config = {
     HaloSpinSpeed = 90,
     HaloLightBrightness = 1.0,
     HaloLightRange = 4,
-    HaloBright = 1.0,
     HaloColorMode = "Rainbow",
     HaloHueSpeed = 0.15,
     HaloHueSpread = 1.0,
@@ -64,12 +56,8 @@ local Config = {
     ToggleWingsKey = Enum.KeyCode.G,
     ToggleHaloKey = Enum.KeyCode.H,
     Enabled = true,
-    Debug = false,
 }
 
--- ══════════════════════════════════════════
--- == UTILS ==
--- ══════════════════════════════════════════
 local function spring(cur, target, vel, dt, stiffness, damping, maxVal)
     dt = math.min(dt, 1/30)
     local force = (target - cur) * stiffness
@@ -111,13 +99,6 @@ local function makeMotor(parent, child, c0, c1)
     return m
 end
 
-local function buildExtraRotation(axis, angle)
-    local a = math.rad(angle)
-    if axis == "X" then return CFrame.Angles(a, 0, 0)
-    elseif axis == "Y" then return CFrame.Angles(0, a, 0)
-    else return CFrame.Angles(0, 0, a) end
-end
-
 local function cleanup(torso, head)
     if torso then
         local o = torso:FindFirstChild("NeonWings")
@@ -129,9 +110,6 @@ local function cleanup(torso, head)
     end
 end
 
--- ══════════════════════════════════════════
--- == ИНИЦИАЛИЗАЦИЯ ==
--- ══════════════════════════════════════════
 local char = plr.Character or plr.CharacterAdded:Wait()
 local torso = char:WaitForChild("Torso")
 local head = char:WaitForChild("Head")
@@ -145,7 +123,7 @@ folder.Name = "NeonWings"
 folder.Parent = torso
 
 -- ══════════════════════════════════════════
--- == СОЗДАНИЕ КРЫЛА ==
+-- == СОЗДАНИЕ КРЫЛА (Mode 2) ==
 -- ══════════════════════════════════════════
 local function createWing(side)
     local model = Instance.new("Model")
@@ -159,22 +137,16 @@ local function createWing(side)
         "Spine", model
     )
 
-    local wingAngleBack = math.rad(Config.WingTiltBack)
-    local wingAngle90 = math.rad(side * 90)
-    local wingAngleUp = math.rad(-Config.WingTiltUp * side)
+    -- ⭐ MODE 2: Rx, Ry, Rz — все без side
+    local Rx = math.rad(Config.WingTiltBack)
+    local Ry = math.rad(90)
+    local Rz = math.rad(-Config.WingTiltUp)
 
     local baseC0 = CFrame.new(
         side * Config.AttachX,
         Config.AttachY,
         Config.AttachZ
-    ) * CFrame.Angles(wingAngleBack, wingAngle90, wingAngleUp)
-
-    if side == -1 then
-        baseC0 = baseC0 * buildExtraRotation(
-            Config.LeftWingExtraAxis,
-            Config.LeftWingExtraAngle
-        )
-    end
+    ) * CFrame.Angles(Rx, Ry, Rz)
 
     local spineMotor = makeMotor(torso, spine, baseC0)
     spineMotor.Name = "WingRoot"
@@ -197,8 +169,9 @@ local function createWing(side)
             "Feather", model
         )
 
+        -- ⭐ MODE 2: перья тоже без side
         local c0 = CFrame.new(alongSpine, 0, 0)
-            * CFrame.Angles(0, 0, math.rad(-dropAngle * side))
+            * CFrame.Angles(0, 0, math.rad(-dropAngle))
             * CFrame.new(0, -length / 2, 0)
 
         local m = makeMotor(spine, feather, c0)
@@ -210,7 +183,6 @@ local function createWing(side)
         })
     end
 
-    -- Trail
     local longestIdx = 1
     local longestLen = 0
     for i, f in ipairs(feathers) do
@@ -253,31 +225,21 @@ end
 local rightWing = createWing(1)
 local leftWing = createWing(-1)
 
--- ══════════════════════════════════════════
--- == СОЗДАНИЕ НИМБА ==
--- ══════════════════════════════════════════
+-- НИМБ
 local haloData = nil
 
 if Config.HaloEnabled then
     haloData = {
         model = Instance.new("Model"),
-        segments = {},
-        spin = 0,
-        hue = 0,
+        segments = {}, spin = 0, hue = 0,
     }
     haloData.model.Name = "NeonHalo"
     haloData.model.Parent = head
 
-    haloData.anchor = makePart(
-        Vector3.new(0.01, 0.01, 0.01),
-        "HaloAnchor", haloData.model
-    )
+    haloData.anchor = makePart(Vector3.new(0.01, 0.01, 0.01), "HaloAnchor", haloData.model)
     haloData.anchor.Transparency = 1
 
-    haloData.anchorMotor = makeMotor(
-        head, haloData.anchor,
-        CFrame.new(0, Config.HaloHeight, 0)
-    )
+    haloData.anchorMotor = makeMotor(head, haloData.anchor, CFrame.new(0, Config.HaloHeight, 0))
     haloData.anchorMotor.Name = "HaloRoot"
 
     local segAngle = 360 / Config.HaloSegments
@@ -300,9 +262,7 @@ if Config.HaloEnabled then
 
         local m = makeMotor(haloData.anchor, seg, c0)
 
-        table.insert(haloData.segments, {
-            part = seg, motor = m, ringPos = ringPos,
-        })
+        table.insert(haloData.segments, {part = seg, motor = m, ringPos = ringPos})
     end
 
     haloData.light = Instance.new("PointLight")
@@ -312,9 +272,7 @@ if Config.HaloEnabled then
     haloData.light.Parent = haloData.anchor
 end
 
--- ══════════════════════════════════════════
--- == ФИЗИКА ==
--- ══════════════════════════════════════════
+-- ФИЗИКА
 local physics = {
     lastCF = root.CFrame,
     smoothVel = Vector3.new(),
@@ -323,15 +281,12 @@ local physics = {
     localVel = Vector3.new(),
     localAccel = Vector3.new(),
     speed = 0,
-    isJumping = false,
-    isFalling = false,
-    isRunning = false,
-    isIdle = true,
+    isJumping = false, isFalling = false,
+    isRunning = false, isIdle = true,
 }
 
 local function physicsUpdate(dt)
     dt = math.min(math.max(dt, 0.001), 1/30)
-
     local vel = root.AssemblyLinearVelocity
     if vel.Magnitude > 100 then vel = vel.Unit * 100 end
 
@@ -359,16 +314,11 @@ local function physicsUpdate(dt)
         and math.abs(physics.smoothVel.Magnitude) > 2
     physics.isIdle = math.abs(physics.smoothVel.Magnitude) < 1.5
     physics.speed = physics.smoothVel.Magnitude
-
     physics.localVel = localVel
     physics.localAccel = localAccel
 end
 
--- ══════════════════════════════════════════
--- == ЦВЕТ ==
--- ══════════════════════════════════════════
 local hue = 0
-
 local function getColor(t)
     if Config.ColorMode == "Rainbow" then
         hue = (hue + Config.HueSpeed) % 1
@@ -382,9 +332,6 @@ local function getColor(t)
     end
 end
 
--- ══════════════════════════════════════════
--- == УПРАВЛЕНИЕ ==
--- ══════════════════════════════════════════
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Config.ToggleWingsKey then
@@ -397,9 +344,6 @@ UserInputService.InputBegan:Connect(function(input, gp)
     end
 end)
 
--- ══════════════════════════════════════════
--- == ГЛАВНЫЙ ЦИКЛ ==
--- ══════════════════════════════════════════
 local function updateWing(wing, dt)
     local side = wing.side
     local t = tick()
@@ -425,15 +369,14 @@ local function updateWing(wing, dt)
 
     for _, f in ipairs(wing.feathers) do
         local wave = math.sin(t * Config.WaveSpeed + f.t * 3) * Config.WaveAmount
-            + physics.localVel.Y * 0.3
-            - physics.speed * 0.1
+            + physics.localVel.Y * 0.3 - physics.speed * 0.1
 
         f.bend, f.bendVel = spring(
             f.bend, wave, f.bendVel, dt,
             Config.SpringStiffness * 0.8, Config.SpringDamping * 1.1, 20
         )
 
-        f.motor.C0 = CFrame.Angles(0, 0, math.rad(f.bend * side)) * f.baseC0
+        f.motor.C0 = CFrame.Angles(0, 0, math.rad(f.bend)) * f.baseC0
         f.part.Color = getColor(f.t * 0.9)
     end
 
@@ -463,19 +406,18 @@ local function updateHalo(dt)
     if Config.HaloColorMode == "Rainbow" then
         for _, seg in ipairs(haloData.segments) do
             local segHue = (haloData.hue + seg.ringPos * Config.HaloHueSpread) % 1
-            seg.part.Color = Color3.fromHSV(segHue, 1, 1) * Config.HaloBright
+            seg.part.Color = Color3.fromHSV(segHue, 1, 1)
         end
         haloData.light.Color = Color3.fromHSV(haloData.hue, 1, 1)
     elseif Config.HaloColorMode == "MatchWings" then
         local c = getColor(0.2)
         for _, seg in ipairs(haloData.segments) do
-            seg.part.Color = c * Config.HaloBright
+            seg.part.Color = c
         end
         haloData.light.Color = c
     else
         for _, seg in ipairs(haloData.segments) do
             seg.part.Color = Config.ColorA:Lerp(Config.ColorB, seg.ringPos)
-                * Config.HaloBright
         end
         haloData.light.Color = Config.ColorA:Lerp(Config.ColorB, 0.5)
     end
@@ -494,12 +436,8 @@ RunService.Heartbeat:Connect(function(dt)
     updateHalo(dt)
 end)
 
--- ══════════════════════════════════════════
--- СТАРТ
--- ══════════════════════════════════════════
 print("========================================")
-print("  Neon Wings v1.0 загружено!")
-print("  G — вкл/выкл крылья")
-print("  H — вкл/выкл нимб")
+print("  Neon Wings v1.0.7 (Mode 2)")
+print("  G — крылья  |  H — нимб")
 print("  github.com/a32435629-collab/neon-wings")
 print("========================================")
