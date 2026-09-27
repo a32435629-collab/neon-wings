@@ -104,7 +104,7 @@ function Halo:update(config, dt, getColor)
         -- Радуга по кругу
         for _, seg in ipairs(self.segments) do
             local segHue = (self.hue + seg.ringPos * config.HaloHueSpread) % 1
-            seg.part.Color = Color3.fromHSV(segHue, 1, 1) * config.HaloBright
+            seg.part.Color = Color3.fromHSV(segHue, 1, 1) 
         end
         self.light.Color = Color3.fromHSV(self.hue, 1, 1)
 
@@ -112,7 +112,7 @@ function Halo:update(config, dt, getColor)
         -- Цвет как у крыльев
         local haloColor = getColor(0.2)
         for _, seg in ipairs(self.segments) do
-            seg.part.Color = haloColor * config.HaloBright
+            seg.part.Color = haloColor 
         end
         self.light.Color = haloColor
 
@@ -120,7 +120,7 @@ function Halo:update(config, dt, getColor)
         -- Градиент от ColorA к ColorB
         for _, seg in ipairs(self.segments) do
             seg.part.Color = config.ColorA:Lerp(config.ColorB, seg.ringPos)
-                * config.HaloBright
+                
         end
         self.light.Color = config.ColorA:Lerp(config.ColorB, 0.5)
     end
