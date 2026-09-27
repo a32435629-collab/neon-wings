@@ -31,6 +31,7 @@ Config.AttachY = 0.7
 Config.AttachZ = 0.5
 Config.WingTiltBack = -50                        -- -50 = назад, 0 = в стороны
 Config.WingTiltUp = 10                           -- 10 = чуть вверх
+Config.WingSideRotate = 50                       -- ⭐ поворот крыла в стороны (градусы)
 
 -- ══════════════════════════════════════════
 -- СВЕТ
@@ -63,7 +64,6 @@ Config.HaloSegments = 48
 Config.HaloSpinSpeed = 90
 Config.HaloLightBrightness = 1.0
 Config.HaloLightRange = 4
-Config.HaloBright = 1.0
 Config.HaloColorMode = "Rainbow"                 -- "Rainbow" | "MatchWings" | "Gradient"
 Config.HaloHueSpeed = 0.15
 Config.HaloHueSpread = 1.0
