@@ -29,9 +29,18 @@ Config.FeatherDropAngle = 75
 Config.AttachX = 0.5
 Config.AttachY = 0.7
 Config.AttachZ = 0.5
-Config.WingTiltBack = -50                        -- -50 = назад, 0 = в стороны
-Config.WingTiltUp = 10                           -- 10 = чуть вверх
-Config.WingSideRotate = 50                       -- ⭐ поворот крыла в стороны (градусы)
+Config.WingTiltBack = -50                        -- наклон назад
+Config.WingTiltUp = 10                           -- наклон вверх
+Config.WingSideRotate = 50                       -- ⭐ поворот в стороны
+
+-- ══════════════════════════════════════════
+-- TRAIL (след от крыльев)
+-- ══════════════════════════════════════════
+Config.TrailEnabled = true                       -- ⭐ вкл/выкл трейлы
+Config.TrailLifetime = 0.6                       -- время жизни следа
+Config.TrailStartAlpha = 0.3                     -- прозрачность в начале
+Config.TrailMidAlpha = 0.6                       -- прозрачность в середине
+Config.TrailLightEmission = 1                    -- свечение трейла
 
 -- ══════════════════════════════════════════
 -- СВЕТ
@@ -42,8 +51,8 @@ Config.LightRange = 2
 -- ══════════════════════════════════════════
 -- АНИМАЦИЯ
 -- ══════════════════════════════════════════
-Config.SpringStiffness = 8                       -- жёсткость пружины
-Config.SpringDamping = 4                         -- затухание
+Config.SpringStiffness = 8
+Config.SpringDamping = 4
 Config.IdleFlapSpeed = 1.2
 Config.IdleFlapAmount = 3
 Config.RunFlapSpeed = 3
